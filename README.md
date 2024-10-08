@@ -55,9 +55,22 @@ entrega el día de mañana sobre posibles retrasos en la entrega de sus paquetes
     docker run --rm -p 8080:8080 nombre_de_la_aplicacion
 
 ### Opción 2
-5. Si estás usando Docker Compose, puedes iniciar todos los servicios con:
+1. Si estás usando Docker Compose, puedes iniciar todos los servicios con:
     ```bash
     docker compose up --build
+
+### Set de datos (requerido)
+- Se deben añadir en redis los códigos del clima para los cuales se generan  notificación vía mail, de la siguiente manera:
+
+#### 1. Acceder al docker del redis
+    docker exec -it id_contenedor sh
+
+
+#### 2. Ingresar al cliente de redis
+    redis-cli
+
+#### 3. Crear la lista con los códigos 1234 y 4567 (separados por espacio)
+    RPUSH notification:codes 1234 4567
 
 ## Pruebas
 

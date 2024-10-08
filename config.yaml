@@ -1,9 +1,9 @@
-port: 8080
+port: 
 api_key: 
-notification_sender: 
+notification_sender: smpt
 smtp:
-  host: 
-  port: 
+  host: smtp.gmail.com
+  port: 587
   username: 
   password: 
 redis:
@@ -13,6 +13,4 @@ redis:
   db: 1
 forecast_service:
   base_url: 
-  api_key:
-
-
+  api_key: 

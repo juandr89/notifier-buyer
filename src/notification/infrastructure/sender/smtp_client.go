@@ -2,6 +2,7 @@ package sender
 
 import (
 	"fmt"
+	"log"
 	"net/smtp"
 
 	"github.com/juandr89/delivery-notifier-buyer/server"
@@ -22,20 +23,21 @@ func (smtpClient *SmtpClient) Send(email string, text string) error {
 	from := smtpClient.configSMTP.Username
 	password := smtpClient.configSMTP.Password
 
-	to := []string{"juandruiz101@gmail.com"}
+	to := []string{email}
 
-	smtpHost := "smtp.gmail.com"
-	smtpPort := "587"
-
-	message := []byte("Subject: Test Email\n\nThis is the email body.")
+	smtpHost := smtpClient.configSMTP.Host
+	smtpPort := fmt.Sprint(smtpClient.configSMTP.Port)
 
 	auth := smtp.PlainAuth("", from, password, smtpHost)
-
+	message := []byte("To: " + to[0] + "\r\n" +
+		"From: " + from + "\r\n" +
+		"Subject: " + "Entrega retrasada por clima" + "\r\n" +
+		"\r\n" + text)
 	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return err
 	}
-	fmt.Println("Email Sent Successfully!")
+	log.Println("Email Sent Successfully!")
 	return nil
 }

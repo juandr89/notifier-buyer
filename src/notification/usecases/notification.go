@@ -2,15 +2,15 @@ package usecases
 
 import (
 	"context"
+	"fmt"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/juandr89/delivery-notifier-buyer/src/notification/domain"
 	third_party "github.com/juandr89/delivery-notifier-buyer/src/notification/infrastructure/third_party"
 )
-
-var text = ""
 
 func RequireBuyerNotification(context context.Context, repository domain.NotificationRepository, code float64) (*bool, error) {
 	notificationCodes, err := repository.GetNotificationCodes(context)
@@ -68,6 +68,9 @@ func SendNotification(requestDataNotification *RequestDataNotification, forecast
 		ForecastDescription: data.Description,
 		BuyerNotification:   *requireBuyerNotification,
 	}
+
+	text := fmt.Sprintf(`Hola! Tenemos programada la entrega de tu paquete para mañana, en la dirección de  entrega esperamos un día con %s y por esta razón es posible que tengamos retrasos. Haremos todo a nuestro alcance para cumplir con tu entrega.`,
+		strings.ToLower(data.Description))
 
 	if *requireBuyerNotification {
 		sender.Send(requestDataNotification.Email, text)
