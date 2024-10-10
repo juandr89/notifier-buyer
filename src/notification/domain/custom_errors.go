@@ -19,8 +19,8 @@ func (e *NotFoundError) Error() string {
 	return fmt.Sprintf("Not Found: %s", e.Message)
 }
 
-func ErrorResponseF(w http.ResponseWriter, statusCode int, message string) {
-	log.Printf("BuyerNotifications %s", message)
+func ErrorResponseF(w http.ResponseWriter, module string, statusCode int, message string) {
+	log.Printf("%s %s", module, message)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)

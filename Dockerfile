@@ -19,7 +19,11 @@ RUN go build -o my-go-app main.go
 FROM alpine:latest
 WORKDIR /app
 COPY --from=build /app/my-go-app .
-COPY config.yaml /app/config.yaml
+#COPY config.yaml /app/config.yaml
+
+COPY load_file.sh /app/load_file.sh
+RUN chmod +x /app/load_file.sh
+
 EXPOSE 8080
-CMD ["./my-go-app"]
+CMD ["/bin/sh", "/app/load_file.sh"]
 

@@ -32,10 +32,11 @@ type SendGridConfig struct {
 }
 
 type RedisConfig struct {
-	Host     string `mapstructure:"host"`
-	Port     int    `mapstructure:"port"`
-	Password string `mapstructure:"password"`
-	DB       int    `mapstructure:"db"`
+	Host      string `mapstructure:"host"`
+	Port      int    `mapstructure:"port"`
+	Password  string `mapstructure:"password"`
+	DB        int    `mapstructure:"db"`
+	TlsEnable bool   `mapstructure:"tls_enable"`
 }
 
 func LoadConfig() (*Config, error) {

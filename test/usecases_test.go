@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"bou.ke/monkey"
 	"github.com/golang/mock/gomock"
 	"github.com/juandr89/delivery-notifier-buyer/src/notification/domain"
 	third_party "github.com/juandr89/delivery-notifier-buyer/src/notification/infrastructure/third_party"
@@ -74,6 +75,7 @@ func TestRequireBuyerNotification(t *testing.T) {
 }
 
 func TestSendNotification(t *testing.T) {
+
 	t.Run("Success", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -82,7 +84,7 @@ func TestSendNotification(t *testing.T) {
 		mockSender := mocks.NewMockNotificationSender(ctrl)
 		mockForecastService := mocks.NewMockForecastService(ctrl)
 
-		requestData := &usecases.RequestDataNotification{
+		requestData := usecases.RequestDataNotification{
 			Email:    "test@example.com",
 			Location: usecases.Location{Latitude: "40.7128", Longitude: "-74.0060"},
 		}
@@ -110,7 +112,6 @@ func TestSendNotification(t *testing.T) {
 	})
 
 	t.Run("ForecastError", func(t *testing.T) {
-
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
@@ -118,7 +119,7 @@ func TestSendNotification(t *testing.T) {
 		mockSender := mocks.NewMockNotificationSender(ctrl)
 		mockForecastService := mocks.NewMockForecastService(ctrl)
 
-		requestData := &usecases.RequestDataNotification{
+		requestData := usecases.RequestDataNotification{
 			Email:    "test@example.com",
 			Location: usecases.Location{Latitude: "40.7128", Longitude: "-74.0060"},
 		}
@@ -143,7 +144,7 @@ func TestSendNotification(t *testing.T) {
 		mockSender := mocks.NewMockNotificationSender(ctrl)
 		mockForecastService := mocks.NewMockForecastService(ctrl)
 
-		requestData := &usecases.RequestDataNotification{
+		requestData := usecases.RequestDataNotification{
 			Email:    "test@example.com",
 			Location: usecases.Location{Latitude: "40.7128", Longitude: "-74.0060"},
 		}
@@ -167,18 +168,88 @@ func TestSendNotification(t *testing.T) {
 		assert.Nil(t, response)
 		assert.EqualError(t, err, "failed to save notification")
 	})
+
+	t.Run("RequireBuyerNotificationError", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockRepo := mocks.NewMockNotificationRepository(ctrl)
+		mockSender := mocks.NewMockNotificationSender(ctrl)
+		mockForecastService := mocks.NewMockForecastService(ctrl)
+
+		requestData := usecases.RequestDataNotification{
+			Email:    "test@example.com",
+			Location: usecases.Location{Latitude: "40.7128", Longitude: "-74.0060"},
+		}
+
+		expectedForecast := &third_party.ForecastServiceResponse{
+			Code:        123,
+			Description: "Sunny",
+		}
+
+		mockForecastService.EXPECT().FetchForecastByLocation(
+			requestData.Location.Longitude, requestData.Location.Latitude, "2",
+		).Return(expectedForecast, nil).Times(1)
+
+		monkey.Patch(usecases.RequireBuyerNotification, func(context context.Context, repository domain.NotificationRepository, code float64) (*bool, error) {
+			return nil, errors.New("failed to get buyer notification")
+		})
+		defer monkey.Unpatch(usecases.RequireBuyerNotification)
+
+		response, err := usecases.SendNotification(requestData, mockForecastService, mockRepo, mockSender)
+
+		assert.Error(t, err)
+		assert.Nil(t, response)
+		assert.EqualError(t, err, "failed to get buyer notification")
+	})
+
+	t.Run("CreateNotificationError", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockRepo := mocks.NewMockNotificationRepository(ctrl)
+		mockSender := mocks.NewMockNotificationSender(ctrl)
+		mockForecastService := mocks.NewMockForecastService(ctrl)
+
+		requestData := usecases.RequestDataNotification{
+			Email:    "test@example.com",
+			Location: usecases.Location{Latitude: "40.7128", Longitude: "-74.0060"},
+		}
+
+		expectedForecast := &third_party.ForecastServiceResponse{
+			Code:        123,
+			Description: "Sunny",
+		}
+
+		mockForecastService.EXPECT().FetchForecastByLocation(
+			requestData.Location.Longitude, requestData.Location.Latitude, "2",
+		).Return(expectedForecast, nil).Times(1)
+
+		expectedRequiredBuyerNotification := true
+		monkey.Patch(usecases.RequireBuyerNotification, func(context context.Context, repository domain.NotificationRepository, code float64) (*bool, error) {
+			return &expectedRequiredBuyerNotification, nil
+		})
+		defer monkey.Unpatch(usecases.RequireBuyerNotification)
+
+		monkey.Patch(usecases.CreateNotification, func(requestDataNotification usecases.RequestDataNotification, code float64, requireBuyerNotification bool) (*domain.Notification, error) {
+			return nil, errors.New("failed to create notification")
+		})
+		defer monkey.Unpatch(usecases.CreateNotification)
+
+		response, err := usecases.SendNotification(requestData, mockForecastService, mockRepo, mockSender)
+
+		assert.Error(t, err)
+		assert.Nil(t, response)
+		assert.EqualError(t, err, "failed to create notification")
+	})
 }
 
 func TestGetBuyerNotification(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	t.Run("Success", func(t *testing.T) {
-
 		mockRepo := mocks.NewMockNotificationRepository(ctrl)
 
-		// requestGetNotification := &usecases.RequestGetNotification{
-		// 	Email: "test@example.com",
-		// }
 		email := "test@example.com"
 		notifications := []domain.Notification{
 			{

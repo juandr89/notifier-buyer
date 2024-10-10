@@ -32,7 +32,7 @@ func (c *NotificationHandler) NotifyBuyer(w http.ResponseWriter, r *http.Request
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&requestDataNotification); err != nil {
-		domain.ErrorResponseF(w, http.StatusBadRequest, "Invalid JSON data")
+		domain.ErrorResponseF(w, "NotifyBuyer", http.StatusBadRequest, "Invalid JSON data")
 		return
 	}
 
@@ -40,15 +40,15 @@ func (c *NotificationHandler) NotifyBuyer(w http.ResponseWriter, r *http.Request
 
 	forecastService, err := third_party.NewForecastService(&c.Config)
 	if err != nil {
-		domain.ErrorResponseF(w, http.StatusInternalServerError, err.Error())
+		domain.ErrorResponseF(w, "NotifyBuyer", http.StatusInternalServerError, err.Error())
 		return
 	}
 	log.Printf("NotifyBuyer request %s", forecastService)
 
-	result, err := usecases.SendNotification(&requestDataNotification, forecastService, c.NotificationRepository, c.NotificationSender)
+	result, err := usecases.SendNotification(requestDataNotification, forecastService, c.NotificationRepository, c.NotificationSender)
 
 	if err != nil {
-		domain.ErrorResponseF(w, http.StatusInternalServerError, err.Error())
+		domain.ErrorResponseF(w, "NotifyBuyer", http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -70,11 +70,11 @@ func (c *NotificationHandler) BuyerNotifications(w http.ResponseWriter, r *http.
 
 	if err != nil {
 		if notFoundErr, ok := err.(*domain.NotFoundError); ok {
-			domain.ErrorResponseF(w, http.StatusNotFound, notFoundErr.Message)
+			domain.ErrorResponseF(w, "NotifyBuyer", http.StatusNotFound, notFoundErr.Message)
 			return
 		}
 
-		domain.ErrorResponseF(w, http.StatusInternalServerError, "Unexpected error has ocurred")
+		domain.ErrorResponseF(w, "NotifyBuyer", http.StatusInternalServerError, "Unexpected error has ocurred")
 		return
 	}
 
@@ -82,7 +82,7 @@ func (c *NotificationHandler) BuyerNotifications(w http.ResponseWriter, r *http.
 
 	log.Printf("BuyerNotifications response %s", jsonResponse)
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusAccepted)
 	w.Write(jsonResponse)
 
 }

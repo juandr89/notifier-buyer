@@ -6,8 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gorilla/mux"
+	"bou.ke/monkey"
+	"github.com/juandr89/delivery-notifier-buyer/app_init"
 	"github.com/juandr89/delivery-notifier-buyer/server"
+	repository "github.com/juandr89/delivery-notifier-buyer/src/notification/infrastructure/repository"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,20 +50,16 @@ func TestDoRequestWithRetry(t *testing.T) {
 
 }
 
-func TestNewRouter(t *testing.T) {
-	port := ":8080"
+func TestNewNotificationSender(t *testing.T) {
+	t.Run("NewNotificationSenderError", func(t *testing.T) {
+		config := server.Config{}
+		monkey.Patch(repository.NewNotificationRepository, func(redisConfig server.RedisConfig) *repository.RedisRepository {
+			return nil
+		})
+		defer monkey.Unpatch(repository.NewNotificationRepository)
+		response := app_init.NewNotificationRepository(&config)
 
-	// Call the NewRouter function to create a new server
-	serverInstance := server.NewRouter(port)
+		assert.Nil(t, response)
+	})
 
-	// Assertions to verify the server instance
-	assert.NotNil(t, serverInstance)
-	assert.Equal(t, port, serverInstance.Addr)
-
-	// Check that the handler is of type *mux.Router
-	router, ok := serverInstance.Handler.(*mux.Router)
-	assert.True(t, ok, "Handler should be of type *mux.Router")
-
-	// Additional checks can be added here if necessary (e.g., routes)
-	assert.NotNil(t, router, "Router should not be nil")
 }

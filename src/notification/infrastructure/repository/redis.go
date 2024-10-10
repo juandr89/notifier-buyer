@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -12,21 +13,38 @@ import (
 )
 
 type RedisRepository struct {
-	Client *redis.Client
+	Client *redis.ClusterClient
 }
 
 func NewNotificationRepository(redisConfig server.RedisConfig) *RedisRepository {
-	redisClient := redis.NewClient(&redis.Options{
-		Addr: fmt.Sprintf("%s:%d", redisConfig.Host, redisConfig.Port),
-		DB:   0,
-	})
+	var redisClusterOptions *redis.ClusterOptions
+	if redisConfig.TlsEnable {
+		redisClusterOptions = &redis.ClusterOptions{
+			Addrs: []string{
+				fmt.Sprintf("%s:%d", redisConfig.Host, redisConfig.Port),
+			},
+			Password: redisConfig.Password,
+			TLSConfig: &tls.Config{
+				InsecureSkipVerify: redisConfig.TlsEnable,
+			},
+		}
+	} else {
+		redisClusterOptions = &redis.ClusterOptions{
+			Addrs: []string{
+				fmt.Sprintf("%s:%d", redisConfig.Host, redisConfig.Port),
+			},
+			Password: redisConfig.Password,
+		}
+	}
+	redisClient := redis.NewClusterClient(redisClusterOptions)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	_, err := redisClient.Ping(ctx).Result()
 	if err != nil {
 		fmt.Printf("Could not connect to Redis: %v", err)
+		return nil
 	}
 	fmt.Printf("Successfully connected to Redis")
 

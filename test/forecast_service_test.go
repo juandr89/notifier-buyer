@@ -10,6 +10,7 @@ import (
 	"bou.ke/monkey"
 	"github.com/golang/mock/gomock"
 	"github.com/juandr89/delivery-notifier-buyer/server"
+
 	third_party "github.com/juandr89/delivery-notifier-buyer/src/notification/infrastructure/third_party"
 	"github.com/stretchr/testify/assert"
 )

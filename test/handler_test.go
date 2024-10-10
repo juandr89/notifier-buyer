@@ -62,7 +62,7 @@ func TestListBuyerNotifications(t *testing.T) {
 		resp := w.Result()
 		defer resp.Body.Close()
 
-		assert.Equal(t, http.StatusCreated, resp.StatusCode)
+		assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 
 		var responseBody usecases.NotificationHistoryServiceResponse
 		err := json.NewDecoder(resp.Body).Decode(&responseBody)
@@ -152,7 +152,7 @@ func TestNotifyBuyer(t *testing.T) {
 			BuyerNotification:   true,
 		}
 
-		monkey.Patch(usecases.SendNotification, func(req *usecases.RequestDataNotification, forecastService third_party.IForecastService, repo domain.NotificationRepository, sender domain.NotificationSender) (*usecases.NotificationServiceResponse, error) {
+		monkey.Patch(usecases.SendNotification, func(req usecases.RequestDataNotification, forecastService third_party.IForecastService, repo domain.NotificationRepository, sender domain.NotificationSender) (*usecases.NotificationServiceResponse, error) {
 			return &mockNotificationResponse, nil
 		})
 		defer monkey.Unpatch(usecases.SendNotification)
@@ -216,10 +216,10 @@ func TestNotifyBuyer(t *testing.T) {
 				Port: 6379,
 			},
 		}
-		monkey.Patch(usecases.SendNotification, func(requestDataNotification *usecases.RequestDataNotification, forecastService third_party.IForecastService, repository domain.NotificationRepository, sender domain.NotificationSender) (*usecases.NotificationServiceResponse, error) {
+		monkey.Patch(usecases.SendNotification, func(requestDataNotification usecases.RequestDataNotification, forecastService third_party.IForecastService, repository domain.NotificationRepository, sender domain.NotificationSender) (*usecases.NotificationServiceResponse, error) {
 			return nil, errors.New("failed to send notification")
 		})
-		defer monkey.Unpatch(server.DoRequestWithRetry)
+		defer monkey.Unpatch(usecases.SendNotification)
 		handler := infrastructure.NewNotificationHandler(mockRepo, mockSender, cfg)
 
 		req := httptest.NewRequest("POST", "/notifications", bytes.NewReader(requestBody))

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"slices"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/juandr89/delivery-notifier-buyer/src/notification/domain"
@@ -28,8 +27,7 @@ func RequireBuyerNotification(context context.Context, repository domain.Notific
 	return &buyerNotification, nil
 }
 
-func CreateNotification(requestDataNotification RequestDataNotification, code float64, requireBuyerNotification bool) (domain.Notification, error) {
-
+func CreateNotification(requestDataNotification RequestDataNotification, code float64, requireBuyerNotification bool) (*domain.Notification, error) {
 	notification := domain.Notification{
 		Email: requestDataNotification.Email,
 		DeliveryLocation: domain.DeliveryLocation{
@@ -41,11 +39,10 @@ func CreateNotification(requestDataNotification RequestDataNotification, code fl
 		Created_at:        time.Now(),
 	}
 
-	return notification, nil
+	return &notification, nil
 }
 
-func SendNotification(requestDataNotification *RequestDataNotification, forecastService third_party.IForecastService, repository domain.NotificationRepository, sender domain.NotificationSender) (*NotificationServiceResponse, error) {
-
+func SendNotification(requestDataNotification RequestDataNotification, forecastService third_party.IForecastService, repository domain.NotificationRepository, sender domain.NotificationSender) (*NotificationServiceResponse, error) {
 	data, err := forecastService.FetchForecastByLocation(requestDataNotification.Location.Longitude, requestDataNotification.Location.Latitude, "2")
 	if err != nil {
 		return nil, err
@@ -58,7 +55,7 @@ func SendNotification(requestDataNotification *RequestDataNotification, forecast
 		return nil, err
 	}
 
-	notification, err := CreateNotification(*requestDataNotification, data.Code, *requireBuyerNotification)
+	notification, err := CreateNotification(requestDataNotification, data.Code, *requireBuyerNotification)
 	if err != nil {
 		return nil, err
 	}
@@ -70,11 +67,11 @@ func SendNotification(requestDataNotification *RequestDataNotification, forecast
 	}
 
 	text := fmt.Sprintf(`Hola! Tenemos programada la entrega de tu paquete para mañana, en la dirección de  entrega esperamos un día con %s y por esta razón es posible que tengamos retrasos. Haremos todo a nuestro alcance para cumplir con tu entrega.`,
-		strings.ToLower(data.Description))
+		data.Description)
 
 	if *requireBuyerNotification {
 		sender.Send(requestDataNotification.Email, text)
-		err := repository.SaveNotification(ctx, notification)
+		err := repository.SaveNotification(ctx, *notification)
 		if err != nil {
 			return nil, err
 		}
