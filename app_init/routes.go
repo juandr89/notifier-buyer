@@ -1,6 +1,7 @@
 package app_init
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -13,6 +14,7 @@ import (
 )
 
 func Routes(cfg *server.Config) *mux.Router {
+	log.Println("Loading routes..")
 	notificationSender := NewNotificationSender(cfg)
 	notificationRepository := NewNotificationRepository(cfg)
 	notificationHandler := infrastructure.NewNotificationHandler(notificationRepository, notificationSender, *cfg)

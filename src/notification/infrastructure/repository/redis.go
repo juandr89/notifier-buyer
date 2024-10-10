@@ -13,30 +13,26 @@ import (
 )
 
 type RedisRepository struct {
-	Client *redis.ClusterClient
+	Client *redis.Client
 }
 
 func NewNotificationRepository(redisConfig server.RedisConfig) *RedisRepository {
-	var redisClusterOptions *redis.ClusterOptions
+	var redisOptions *redis.Options
 	if redisConfig.TlsEnable {
-		redisClusterOptions = &redis.ClusterOptions{
-			Addrs: []string{
-				fmt.Sprintf("%s:%d", redisConfig.Host, redisConfig.Port),
-			},
+		redisOptions = &redis.Options{
+			Addr:     fmt.Sprintf("%s:%d", redisConfig.Host, redisConfig.Port),
 			Password: redisConfig.Password,
 			TLSConfig: &tls.Config{
 				InsecureSkipVerify: redisConfig.TlsEnable,
 			},
 		}
 	} else {
-		redisClusterOptions = &redis.ClusterOptions{
-			Addrs: []string{
-				fmt.Sprintf("%s:%d", redisConfig.Host, redisConfig.Port),
-			},
+		redisOptions = &redis.Options{
+			Addr:     fmt.Sprintf("%s:%d", redisConfig.Host, redisConfig.Port),
 			Password: redisConfig.Password,
 		}
 	}
-	redisClient := redis.NewClusterClient(redisClusterOptions)
+	redisClient := redis.NewClient(redisOptions)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -44,7 +40,7 @@ func NewNotificationRepository(redisConfig server.RedisConfig) *RedisRepository 
 	_, err := redisClient.Ping(ctx).Result()
 	if err != nil {
 		fmt.Printf("Could not connect to Redis: %v", err)
-		return nil
+		//eturn nil
 	}
 	fmt.Printf("Successfully connected to Redis")
 

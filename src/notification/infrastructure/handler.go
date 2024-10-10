@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"regexp"
 
 	"github.com/gorilla/mux"
 	"github.com/juandr89/delivery-notifier-buyer/server"
@@ -26,6 +27,11 @@ func NewNotificationHandler(repo domain.NotificationRepository, sender domain.No
 	}
 }
 
+func isValidEmail(email string) bool {
+	var emailRegex = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+	return emailRegex.MatchString(email)
+}
+
 func (c *NotificationHandler) NotifyBuyer(w http.ResponseWriter, r *http.Request) {
 
 	var requestDataNotification usecases.RequestDataNotification
@@ -33,6 +39,11 @@ func (c *NotificationHandler) NotifyBuyer(w http.ResponseWriter, r *http.Request
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&requestDataNotification); err != nil {
 		domain.ErrorResponseF(w, "NotifyBuyer", http.StatusBadRequest, "Invalid JSON data")
+		return
+	}
+
+	if !isValidEmail(requestDataNotification.Email) {
+		domain.ErrorResponseF(w, "NotifyBuyer", http.StatusBadRequest, "Invalid email")
 		return
 	}
 
@@ -82,7 +93,7 @@ func (c *NotificationHandler) BuyerNotifications(w http.ResponseWriter, r *http.
 
 	log.Printf("BuyerNotifications response %s", jsonResponse)
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusAccepted)
+	w.WriteHeader(http.StatusOK)
 	w.Write(jsonResponse)
 
 }
