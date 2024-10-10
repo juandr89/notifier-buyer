@@ -15,6 +15,4 @@ services:
     image: "redis:alpine"
     container_name: redis
     ports:
-      - "6379:6379"  
-    command: > 
-      redis-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes 
+      - "6379:6379" 

@@ -26,7 +26,7 @@ entrega el día de mañana sobre posibles retrasos en la entrega de sus paquetes
 
 - [Docker](https://docs.docker.com/get-docker/) instalado en máquina.
 - [Docker Compose](https://docs.docker.com/compose/install/) (opcional, pero recomendado para facilitar la gestión de contenedores).
-**Golang**: [Instalación de Golang](https://golang.org/doc/install)
+- **Golang**: [Instalación de Golang](https://golang.org/doc/install)
 
 ## Instalación
 
@@ -65,11 +65,11 @@ entrega el día de mañana sobre posibles retrasos en la entrega de sus paquetes
 #### 1. Acceder al docker del redis
     docker exec -it id_contenedor sh
 
-#### 2. Ingresar al cliente de redis
-    redis-cli
-
-### 3. Ejecutar el siguiente comando para corregir cluster
-    --cluster fix localhost:6379 
+#### 2. Ejecutar el siguiente comando para corregir cluster
+    redis-cli --cluster fix localhost:6379
+    
+#### 3. Ingresar al cliente de redis
+    redis-cli 
 
 #### 4. Crear la lista con los códigos 1234 y 4567 (códigos de ejemplo, separados por espacio)
     RPUSH notification:codes 1234 4567
