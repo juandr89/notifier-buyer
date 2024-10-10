@@ -9,14 +9,11 @@ entrega el día de mañana sobre posibles retrasos en la entrega de sus paquetes
 - [Tecnologías](#tecnologías)
 - [Requisitos](#requisitos)
 - [Instalación](#instalación)
-- [Uso](#uso)
 - [Pruebas](#pruebas)
-- [Contribuciones](#contribuciones)
-- [Licencia](#licencia)
 
 ## Características
 
-- Arquitecturas Limpias
+- Arquitectura Limpias
 - Clean Code
 
 ## Tecnologías
@@ -27,11 +24,14 @@ entrega el día de mañana sobre posibles retrasos en la entrega de sus paquetes
 
 ## Requisitos
 
-- [Docker](https://docs.docker.com/get-docker/) instalado en tu máquina.
+- [Docker](https://docs.docker.com/get-docker/) instalado en máquina.
 - [Docker Compose](https://docs.docker.com/compose/install/) (opcional, pero recomendado para facilitar la gestión de contenedores).
-**Golang**: [Instalación de Golang](https://golang.org/doc/install) (opcional)
+**Golang**: [Instalación de Golang](https://golang.org/doc/install)
 
 ## Instalación
+
+- Las variables de entorno se deben definir en el archivo load_file.sh 
+
 ### Opción 1
 1. Clona el repositorio:
    ```bash
@@ -65,11 +65,13 @@ entrega el día de mañana sobre posibles retrasos en la entrega de sus paquetes
 #### 1. Acceder al docker del redis
     docker exec -it id_contenedor sh
 
-
 #### 2. Ingresar al cliente de redis
     redis-cli
 
-#### 3. Crear la lista con los códigos 1234 y 4567 (separados por espacio)
+### 3. Ejecutar el siguiente comando para corregir cluster
+    --cluster fix localhost:6379 
+
+#### 4. Crear la lista con los códigos 1234 y 4567 (códigos de ejemplo, separados por espacio)
     RPUSH notification:codes 1234 4567
 
 ## Pruebas
