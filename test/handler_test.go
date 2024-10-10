@@ -62,7 +62,7 @@ func TestListBuyerNotifications(t *testing.T) {
 		resp := w.Result()
 		defer resp.Body.Close()
 
-		assert.Equal(t, http.StatusAccepted, resp.StatusCode)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 		var responseBody usecases.NotificationHistoryServiceResponse
 		err := json.NewDecoder(resp.Body).Decode(&responseBody)

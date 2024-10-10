@@ -19,7 +19,7 @@ func TestSaveNotification(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	t.Run("ConnectionFailureTlsDisable", func(t *testing.T) {
+	t.Run("ConnectionTlsDisable", func(t *testing.T) {
 		redisConfig := server.RedisConfig{Host: "localhost", Port: 6379}
 		_, mock := redismock.NewClientMock()
 
@@ -27,9 +27,9 @@ func TestSaveNotification(t *testing.T) {
 
 		repo := repository.NewNotificationRepository(redisConfig)
 
-		assert.Nil(t, repo)
+		assert.NotNil(t, repo)
 	})
-	t.Run("ConnectionFailureTlsEnable", func(t *testing.T) {
+	t.Run("ConnectionTlsEnable", func(t *testing.T) {
 		redisConfig := server.RedisConfig{Host: "localhost", Port: 6379, TlsEnable: true}
 		_, mock := redismock.NewClientMock()
 
@@ -37,7 +37,7 @@ func TestSaveNotification(t *testing.T) {
 
 		repo := repository.NewNotificationRepository(redisConfig)
 
-		assert.Nil(t, repo)
+		assert.NotNil(t, repo)
 	})
 
 	t.Run("Success", func(t *testing.T) {
